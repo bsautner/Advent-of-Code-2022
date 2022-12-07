@@ -13,7 +13,7 @@ class AOC7 {
     fun process() {
         input.forEachLine { list.add(it) }
         PWD.nodes["/"] = Node("/", PWD)
-        buildNodeTreeFromCommandList(list.listIterator(), PWD)
+        buildNodeTreeFromCommandList(list, PWD)
 
         val answer =  getSmallNodesSum(PWD)
         println("Part 1 $answer")
@@ -63,43 +63,45 @@ class AOC7 {
 
     }
 
-    private fun buildNodeTreeFromCommandList(iterator: MutableIterator<String>, pwd: Node?) {
-        if (iterator.hasNext()) {
-            val line = iterator.next()
+    private tailrec fun buildNodeTreeFromCommandList(list: List<String>, pwd: Node?) {
+        if (list.isEmpty()) {
+            return
+        }
+
+
+            val line = list.first()
+            val rest = list.drop(1)
             val parts = line.split(" ")
 
             if (isNumeric(parts[0])) {
                 val item = Item(parts[1], parts[0].toLong())
                 pwd?.items?.add(item)
-                buildNodeTreeFromCommandList(iterator, pwd)
+                buildNodeTreeFromCommandList(rest, pwd)
             }
             else {
                 when (parts[0]) {
                     "dir" -> {
                         pwd?.nodes?.set(parts[1], Node(parts[1], pwd))
-                        buildNodeTreeFromCommandList(iterator, pwd)
+                        buildNodeTreeFromCommandList(rest, pwd)
                     }
                     "$" -> {
                         if (parts[1] == "cd") {
                             if (parts[2] == "..") {
-                                buildNodeTreeFromCommandList(iterator, pwd?.parent)
+                                buildNodeTreeFromCommandList(rest, pwd?.parent)
                             } else {
                                 val node = pwd?.nodes?.get(parts[2])
-                                buildNodeTreeFromCommandList(iterator, node)
+                                buildNodeTreeFromCommandList(rest, node)
                             }
 
                             //    pwd = pwd.nodes[parts[2]]!!
                         } else if (parts[1] == "ls") {
-                            buildNodeTreeFromCommandList(iterator, pwd)
+                            buildNodeTreeFromCommandList(rest, pwd)
                         }
                     }
 
                 }
             }
 
-
-
-        }
     }
 
     companion object {
