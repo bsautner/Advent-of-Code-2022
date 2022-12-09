@@ -1,84 +1,41 @@
 import java.io.File
 
 class AOC8 {
-    private val input = File("/home/ben/aoc/input.txt")
-
-    private val sample = mutableListOf<String>()
 
     var maxScore = 0
 
 
     fun process() {
-        input.forEachLine {
-            sample.add(it)
-        }
-
-        val charArrays = sample.map { it.toCharArray() }
-        val matrix = charArrays.toTypedArray()
+        val input = File("/home/ben/aoc/input-8.txt")
+        val sample = input.useLines { it.toList() }
+        val matrix = sample.map { it.toCharArray() }.toTypedArray()
         var count = 0
 
-        for (y in matrix.indices) {
-            for (x in matrix[y].indices)
-            {
+        matrix.mapIndexed { y, row ->
+            row.mapIndexed { x, _ ->
                 if (isVisible(x, y, matrix)) {
                     count++
                 }
+                scoreTree(x, y, matrix)
             }
         }
-        println("Part 1 Answer: $count")
 
-        for (y in matrix.indices) {
-            for (x in matrix[y].indices)
-            {
-               scoreTree(x, y, matrix)
-            }
-        }
+        println("Part 1 Answer: $count")
         println("Part 2 Answer: $maxScore")
 
     }
 
     private fun scoreTree(x: Int, y: Int, matrix: Array<CharArray>)  : Int {
-        var up = 0
-        var down = 0
-        var left = 0
-        var right = 0
-
         if (x == 0 || x == matrix.size -1 || y == 0 || y == matrix.size -1) {
             return 0
         }
 
         val a = matrix[y][x].digitToInt()
-        for (i in x+1 until matrix[y].size) {
-            val s = matrix[y][i].digitToInt()
-            right++
-            if (s >= a) {
-                break
-            }
-        }
 
-        for (i in x-1 downTo 0) {
-            val s = matrix[y][i].digitToInt()
-            left++
-            if (s >= a) {
-               break
-            }
-        }
-
-        for (i in y+1 until matrix.size) {
-            val s = matrix[i][x].digitToInt()
-            down++
-            if (s >= a) {
-               break
-            }
-        }
-
-        for (i in y-1 downTo 0) {
-            val s = matrix[i][x].digitToInt()
-            up++
-            if (s >= a) {
-              break
-            }
-        }
+        val right = matrix[y].takeWhile { it.digitToInt() < a }.count()
+        val left = matrix[y].reversed().takeWhile { it.digitToInt() < a }.count()
+        val down = matrix.takeWhile { it[x].digitToInt() < a }.count()
+        val up = matrix.reversed().takeWhile { it[x].digitToInt() < a }.count()
 
         val score = up * down * left * right
 
@@ -90,65 +47,18 @@ class AOC8 {
     }
 
     private fun isVisible(x: Int, y: Int, matrix: Array<CharArray>) : Boolean {
-
-        var up = true
-        var down = true
-        var left = true
-        var right = true
-
-
         if (x == 0 || x == matrix.size -1 || y == 0 || y == matrix.size -1) {
             return true
         }
 
         val a = matrix[y][x].digitToInt()
 
-        for (i in x+1 until matrix[y].size) {
-            val s = matrix[y][i].digitToInt()
-            if (s >= a) {
-                if (right) {
-                    right = false
-                }
+        val right = matrix[y].takeWhile { it.digitToInt() < a }.count()
+        val left = matrix[y].reversed().takeWhile { it.digitToInt() < a }.count()
+        val down = matrix.takeWhile { it[x].digitToInt() < a }.count()
+        val up = matrix.reversed().takeWhile { it[x].digitToInt() < a }.count()
 
-            }
-        }
-
-        for (i in x-1 downTo 0) {
-            val s = matrix[y][i].digitToInt()
-            if (s >= a) {
-                if (left) {
-                    left = false
-                }
-
-            }
-        }
-
-
-        for (i in y+1 until matrix.size) {
-            val s = matrix[i][x].digitToInt()
-            if (s >= a) {
-                if (down) {
-                    down = false
-                }
-
-            }
-        }
-
-        for (i in y-1 downTo 0) {
-            val s = matrix[i][x].digitToInt()
-            if (s >= a) {
-                if (up) {
-                    up = false
-                }
-
-            }
-        }
-
-
-        return up or down or left or right
-
-
-
+        return right == 0 || left == 0 || down == 0 || up == 0
     }
 
 
